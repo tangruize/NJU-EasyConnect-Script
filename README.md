@@ -25,11 +25,19 @@ sudo systemctl stop EasyMonitor.service
 sudo systemctl disable EasyMonitor.service
 ```
 
+安装依赖关系:
+
+```bash
+sudo apt install net-tools  # 使用了route命令
+```
+
 直接运行:
 
 ```bash
 ./start-easyconnect.sh
 ```
+
+通过点击图标运行: 修改`/usr/share/applications/EasyConnect.desktop`第5行`Exec=`为你的`start-easyconnect.sh`的绝对路径.
 
 操作路由表需要root权限, 会提示你输入密码.
 
