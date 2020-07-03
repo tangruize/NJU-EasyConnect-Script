@@ -2,6 +2,13 @@
 
 EASYCONNECT=/usr/share/sangfor/EasyConnect/EasyConnect
 
+check_dependency() {
+    if ! which route &> /dev/null; then
+        echo 1>&2 Error: \"route\" not found, run \"sudo apt install net-tools\"
+        exit 1
+    fi
+}
+
 check_network() {
     export VPN_IP=`host vpn.nju.edu.cn | head -1 | rev | cut -d' ' -f1 | rev`
     export VPN_IP_START=`echo $VPN_IP | cut -d'.' -f-2`
@@ -90,6 +97,7 @@ add_route_rules() {
     echo done
 }
 
+check_dependency
 check_network
 if [ -z "$1" ]; then
     check_easy_connect
