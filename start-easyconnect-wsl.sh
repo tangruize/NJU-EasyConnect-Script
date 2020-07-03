@@ -39,7 +39,7 @@ get_iface_gw() {
         sleep 1
         echo -en '\b\b\b'${i}s
     done
-    export IFACE_GW=`ip -o -4 route show dev ${IFACE} | grep via | head -1 | cut -d' ' -f4`
+    export IFACE_GW=`ip -o -4 route show dev ${IFACE} | grep via | cut -d' ' -f4 | sort | uniq -c | sort -nr | head -1 | tr -s ' ' | cut -d' ' -f3`
     echo -e '\b\b\bdone'
 }
 
