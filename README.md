@@ -25,21 +25,40 @@ sudo systemctl stop EasyMonitor.service
 sudo systemctl disable EasyMonitor.service
 ```
 
+有几个程序有 setuid 权限, 但是不是必要的, 可以去掉:
+
+```bash
+sudo chmod -s /usr/share/sangfor/EasyConnect/resources/bin/CSClient /usr/share/sangfor/EasyConnect/resources/bin/ECAgent
+```
+
 安装依赖关系:
 
 ```bash
 sudo apt install net-tools  # 使用了route命令
 ```
 
-直接运行:
+直接运行 (操作路由表需要root权限, 会提示你输入密码):
 
 ```bash
 ./start-easyconnect.sh
 ```
 
-通过点击图标运行: 修改`/usr/share/applications/EasyConnect.desktop`第5行`Exec=`为你的`start-easyconnect.sh`的绝对路径.
+通过点击图标运行: 修改`/usr/share/applications/EasyConnect.desktop`第5行`Exec=`为你的`start-easyconnect.sh`的绝对路径:
 
-操作路由表需要root权限, 会提示你输入密码.
+```bash
+sudo sed "s@Exec=.*@Exec=\"`realpath ./start-easyconnect.sh`\"@" /usr/share/applications/EasyConnect.desktop #-i
+# 上一行命令的注释去掉(加 -i)才能写入
+```
+
+如果不希望使用 EasyConnect 提供的 DNS 服务器, 可以对程序进行 patch:
+
+```bash
+cd /usr/share/sangfor/EasyConnect/resources/bin
+sudo cp svpnservice svpnservice.bak
+echo -e '\x39\xc0\x39\xc0' | sudo dd of=svpnservice count=4 seek=284760 oflag=seek_bytes iflag=count_bytes conv=notrunc  # 39 c0: cmp eax, eax
+```
+
+`svpnservice` 程序判断 `/etc/resolv.conf` 的修改时间有没有发生变化, 如果改变了就将内容复写掉. 上面的命令修改了程序, 让程序认为文件始终没有被修改.
 
 ## Windows WSL
 

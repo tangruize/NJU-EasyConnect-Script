@@ -116,6 +116,9 @@ else
     fi
     delete_route_rules
     add_route_rules
+    if [ -f /etc/resolv.conf.sangforbak ]; then
+        sudo cp /etc/resolv.conf.sangforbak /etc/resolv.conf
+    fi
     if [ $START_BY_SCRIPT -eq 0 ]; then
         echo -n 'Wait EasyConnect exit ... '
         tail --pid=$EASY_CONNECT_PID -f /dev/null
