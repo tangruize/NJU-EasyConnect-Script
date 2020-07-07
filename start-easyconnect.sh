@@ -97,6 +97,16 @@ add_route_rules() {
     echo done
 }
 
+change_dns() {
+    if [ -f /etc/resolv.conf.sangforbak ]; then
+        if [ "`dd if=/usr/share/sangfor/EasyConnect/resources/bin/svpnservice count=2 skip=284760 iflag=skip_bytes,count_bytes 2>/dev/null`" = "`echo -en '\x39\xc0'`" ]; then
+            echo -n 'Restore DNS server ... '
+            grep 'were added' /usr/share/sangfor/EasyConnect/resources/logs/DNS.log | tail -1 | cut -d: -f4- | sed 's/-A/-D/' | cat - <(echo cp /etc/resolv.conf.sangforbak /etc/resolv.conf) | sudo sh -e &>/dev/null
+            [ $? -eq 0 ] && echo 'done' || echo 'failed'
+        fi
+    fi
+}
+
 check_dependency
 check_network
 if [ -z "$1" ]; then
@@ -116,9 +126,7 @@ else
     fi
     delete_route_rules
     add_route_rules
-    if [ -f /etc/resolv.conf.sangforbak ]; then
-        sudo cp /etc/resolv.conf.sangforbak /etc/resolv.conf
-    fi
+    change_dns
     if [ $START_BY_SCRIPT -eq 0 ]; then
         echo -n 'Wait EasyConnect exit ... '
         tail --pid=$EASY_CONNECT_PID -f /dev/null

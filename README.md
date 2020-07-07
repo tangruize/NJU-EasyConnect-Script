@@ -136,6 +136,7 @@ Linux脚本主要流程如下, 如有人感兴趣可以研究一下 Windows 全�
 - 等待路由表更新
 - 删除 tun0 网卡的所有路由规则, 除了 `vpn.nju.edu.cn` 的 IP 地址所在子网
 - 添加路由规则, 上一步除外的子网不会添加
+- 如果对 svpnservice 进行了 hack, 删除相关 iptables 规则并还原 resolv.conf
 - 如果脚本启动了 EasyMonitor.service, 则等待 EasyConnect 退出并停止 EasyMonitor.service
 
 删除时跳过`vpn.nju.edu.cn`的IP地址所在子网是因为这个网址需要走默认路由, 路由规则里会跳过这个IP, 比如该网址的IP是`218.94.142.100`, 路由规则允许`218.94.142.99`和`218.94.142.101`走 tun0, 而不允许`218.94.142.100`, 所以不作更改, 且添加时也会跳过这个子网.
