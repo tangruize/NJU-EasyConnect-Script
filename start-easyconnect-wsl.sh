@@ -44,7 +44,7 @@ get_iface_gw() {
 }
 
 get_route_to_delete() {
-    export ROUTE_TO_DEL=`route -n | grep ${IFACE}$ | tr -s ' ' | grep -v $VPN_IP_START | grep -v ' 0.0.0.0'`
+    export ROUTE_TO_DEL=`route -n | grep ${IFACE}\$ | tr -s ' ' | grep -v $VPN_IP_START | grep -v ' 0.0.0.0'`
     ([ -n "$ROUTE_TO_DEL" ] || ! ps -p $EASY_CONNECT_PID &> /dev/null) && return 0
     return 1
 }

@@ -5,6 +5,7 @@ EasyConnect 是一个可用于访问校内资源的 VPN 软件, 但该软件添�
 
 目前实现了:
 
+- Windows 脚本 [start-easyconnect-win.sh](./Windows)
 - Windows WSL 脚本 [start-easyconnect-wsl.sh](./start-easyconnect-wsl.sh)
 - MacOS 脚本 [start-easyconnect-mac.sh](./start-easyconnect-mac.sh)
 - Linux 脚本 [start-easyconnect-linux.sh](./start-easyconnect-linux.sh)
@@ -16,9 +17,37 @@ EasyConnect 是一个可用于访问校内资源的 VPN 软件, 但该软件添�
 如果使用 Ubuntu 20.04 提示 `Harfbuzz version too old`
 可以尝试 [libpango/README.md](libpango/README.md) 的解决方法.
 
-## Windows WSL
+## Windows
 
-由于本人对 Windows 的 CMD 不熟悉, 暂时写了一个 WSL 脚本.
+### Busybox
+
+进入 [Windows](./Windows) 目录,
+把 [start-easyconnect-win.sh](./Windows/start-easyconnect-win.sh)
+拖到 [sh.exe](./Windows/sh.exe) 上面打开.
+
+或在 Windows 目录打开 CMD 输入:
+
+```cmd
+.\sh.exe start-easyconnect-win.sh
+```
+
+或者对 sh.exe 创建一个快捷方式,
+右键-属性-快捷方式-目标 的最后加上 `start-easyconnect-win.sh` (前面有个空格隔开),
+运行方式可以改为最小化.
+
+注意: 如果你的 `EasyConnect.exe` 不在 `C:/Program\ Files\ \(x86\)/Sangfor/SSL/EasyConnect`,
+请修改 [start-easyconnect-win.sh 第三行](https://github.com/tangruize/NJU-EasyConnect-Script/blob/master/Windows/start-easyconnect-win.sh#L3).
+
+Busybox 说明: 编译自 [busybox-w32](https://github.com/rmyorston/busybox-w32),
+仅去选了一些没有用到的 applet, 更换了图标, 没有修改源代码.
+也可以使用 [官网](https://frippery.org/busybox/) 的
+[busybox.exe](https://frippery.org/files/busybox/busybox.exe),
+需要重命名为 `sh.exe` 或 `bash.exe` 才能拖动运行.
+
+### WSL
+
+需要安装 WSL, 由于 Busybox 的方法不需要安装额外的程序, 因此不建议专门为此装 WSL.
+
 推荐使用 Ubuntu 18.04.
 
 安装依赖关系:
@@ -112,3 +141,17 @@ echo -e '\x39\xc0\x39\xc0' | sudo dd of=svpnservice count=4 seek=284760 oflag=se
 ```txt
 10.254.253.0/24 36.152.24.0/24 58.192.0.0/10 112.25.191.64/26 114.212.0.0/16 172.0.0.0/8 180.209.0.0/20 202.0.0.0/8 210.28.0.0/14 211.162.0.0/16 218.94.142.0/24 219.219.112.0/20 221.6.40.128/25
 ```
+
+## 其他问题
+
+虽然上面的子网用起来没啥问题, 但这个网页提供的似乎更精确一点 <http://ip.t086.com/place/7>.
+
+删除路由表时出现少量错误提示影响不大.
+
+使用这个脚本启动 EasyConnect 后, 仅能访问校内 IP, 而不能使用 CNKI 等网站资源.
+如果需要使用 CNKI 等资源, 一个 workaround 是直接启动 EasyConnect, 不用脚本启动.
+另一个 workaround 是手动或用脚本添加额外的路由表规则, 将 cnki.net 等常见网站添加进去,
+但我觉得会非常麻烦, 因为子域名太多, 难以将所有需要的都加进去.
+
+如果有 http_proxy 等代理方式, 并使用 PAC 脚本或浏览器插件自动代理 *.nju.edu.cn 和 cnki.net 等网站,
+比起底层的改路由表更好.
