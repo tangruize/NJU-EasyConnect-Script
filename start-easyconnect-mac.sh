@@ -16,10 +16,6 @@ check_easy_connect() {
     fi
 }
 
-NOECHO() {
-    return 0
-}
-
 wait_60s() {
     ECHO=${3:-echo}
     $ECHO -n "Wait $1 ... 60s"
@@ -37,13 +33,27 @@ wait_60s() {
     fi
 }
 
+show_progress() {
+    LEN=${#2}
+    if [ "$1" -ne 1 ]; then
+        for _i in `seq $((LEN*2+1))`; do
+            if [ "$1" -ne "$2" ]; then
+                echo -en '\b'
+            else
+                echo -en '\b \b'
+            fi
+        done
+    fi
+    if [ "$1" -ne "$2" ]; then
+        printf "%0${LEN}d/$2" $1
+    fi
+}
+
 start_easy_connect() {
-    echo -n 'Starting EasyConnect ... '
     if ! open -a EasyConnect; then
         echo 1>&2 Error: Open EasyConnect failed
         exit 1
     fi
-    echo done
 }
 
 get_route_to_delete() {
@@ -55,7 +65,7 @@ get_route_to_delete() {
 }
 
 delete_route_rules() {
-    echo 'Delete route rules ... '
+    echo -n 'Delete route rules ... '
     sleep 3
     get_route_to_delete
     NET_IP=(`echo "$ROUTE_TO_DEL" | cut -d' ' -f1`)
@@ -63,31 +73,36 @@ delete_route_rules() {
     export GATEWAY=`echo "$ROUTE_TO_DEL" | cut -d' ' -f2 | uniq | head -1`
     for ((i=0;i<${#NET_IP[@]};i++)); do
         if grep -vq / <<< ${NET_IP[i]} && [ "${NET_FLAG[i]}" = "UGSc" ]; then
-            sudo route delete "${NET_IP[i]}/0"
+            sudo route delete "${NET_IP[i]}/0" > /dev/null
         else
-            sudo route delete "${NET_IP[i]}"
+            sudo route delete "${NET_IP[i]}" > /dev/null
         fi
+        show_progress $((i+1)) ${#NET_IP[@]}
     done
+    echo done
 }
 
 add_route_rules() {
-    echo 'Add route rules ... '
+    echo -n 'Add route rules ... '
     if [ -z "$GATEWAY" ]; then
         GATEWAY=`ifconfig tun0 | tr ' ' '\n' | grep '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1`
         if [ -z "$GATEWAY" ]; then
             echo 1>&2 Warning: Gateway is null
         fi
     fi
-    SUBNET="10.254.253.0/24 36.152.24.0/24 58.192.0.0/10 112.25.191.64/26 114.212.0.0/16 172.0.0.0/8 180.209.0.0/20 202.0.0.0/8 210.28.0.0/14 211.162.0.0/16 218.94.142.0/24 219.219.112.0/20 221.6.40.128/25"
-    for i in $SUBNET; do
-        if [[ $i != ${VPN_IP_START}* ]]; then
-            sudo route -n add -net $i $GATEWAY
+    SUBNET=(36.152.24.0/24 58.192.32.0/20 58.192.48.0/21 58.193.224.0/19 58.240.127.0/27 112.25.191.64/26 114.212.0.0/16 172.0.0.0/8 180.209.0.0/20 202.38.2.0/23 202.38.126.160/28 202.119.32.0/19 202.127.247.0/24 210.28.0.0/14 211.162.26.0/27 211.162.81.0/25 218.94.142.0/24 219.219.112.0/20 221.6.40.128/25 222.94.3.0/24 222.94.208.0/24 122.115.32.0/19 101.230.240.0/20 42.62.48.0/20 42.62.64.0/18 140.210.64.0/19 183.84.0.0/21 103.88.33.0/24 23.33.94.0/24 162.159.129.0/24 34.107.128.0/24 140.234.252.0/24 151.101.228.0/22 104.18.0.0/24 195.128.8.0/24 151.101.0.0/16 104.18.20.0/24 47.114.157.0/24)
+    for ((i=0;i<${#SUBNET[@]};i++)); do
+        if [[ ${SUBNET[i]} != ${VPN_IP_START}* ]]; then
+            sudo route -n add -net ${SUBNET[i]} $GATEWAY > /dev/null
+            show_progress $((i+1)) ${#SUBNET[@]}
         fi
     done
+    echo done
 }
 
 check_network
 check_easy_connect
+sudo true
 start_easy_connect
 wait_60s EasyConnect get_route_to_delete
 if [ -z "$ROUTE_TO_DEL" ]; then
