@@ -31,7 +31,7 @@ get_route_to_delete() {
     return 1
 }
 
-wait_60s() {
+_wait_60s() {
     echo -n "Wait $1 ... 60s"
     for _i in `seq -w 59 -1 -1`; do
         $2 && break
@@ -45,6 +45,15 @@ wait_60s() {
         echo -e '\b\b\bdone'
         return 0
     fi
+}
+
+wait_60s() {
+    while ! _wait_60s "$@"; do
+        read -p "Continue wait? [Y/n] " cont
+        if [ "$cont" != "" ] && [ "$cont" != 'Y' ] && [ "$cont" != 'y' ]; then
+            return 1
+        fi
+    done
 }
 
 show_progress() {
