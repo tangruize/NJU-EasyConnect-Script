@@ -14,8 +14,17 @@ EasyConnect 是一个可用于访问校内资源的 VPN 软件, 但该软件添�
 
 访问 <https://vpn.nju.edu.cn/> 下载相应的客户端并安装 (校园网可能无法访问).
 
+## 常见问题
+
+安装 EasyConnect 时,
 如果使用 Ubuntu 20.04 提示 `Harfbuzz version too old`
 可以尝试 [libpango/README.md](libpango/README.md) 的解决方法.
+
+启动 EasyConnect 后, 如果部分网站提示您当前 ip 并非校内地址, 这是因为 EasyConnect 不支持 IPv6,
+需要在系统设置中关闭 IPv6 功能 (浏览器中可通过 IPvFoo 等插件查看网页是否通过 IPv6 连接).
+
+MacOS 脚本报错问题可以尝试 [issue#2](https://github.com/tangruize/NJU-EasyConnect-Script/issues/2)
+的解决方法.
 
 ## Windows
 
@@ -31,9 +40,8 @@ EasyConnect 是一个可用于访问校内资源的 VPN 软件, 但该软件添�
 .\sh.exe start-easyconnect-win.sh
 ```
 
-或者对 sh.exe 创建一个快捷方式,
-右键-属性-快捷方式-目标 的最后加上 `start-easyconnect-win.sh` (前面有个空格隔开),
-运行方式可以改为最小化.
+或者双击 [create-shortcuts.bat](./Windows/create-shortcuts.bat)
+在桌面上创建一个启动脚本的快捷方式.
 
 注意: 如果你的 `EasyConnect.exe` 不在 `C:/Program\ Files\ \(x86\)/Sangfor/SSL/EasyConnect`,
 请修改 [start-easyconnect-win.sh 第三行](https://github.com/tangruize/NJU-EasyConnect-Script/blob/master/Windows/start-easyconnect-win.sh#L3).
@@ -44,7 +52,7 @@ Busybox 说明: 编译自 [busybox-w32](https://github.com/rmyorston/busybox-w32
 [busybox.exe](https://frippery.org/files/busybox/busybox.exe),
 需要重命名为 `sh.exe` 或 `bash.exe` 才能拖动运行.
 
-### WSL
+### WSL (不推荐)
 
 需要安装 WSL, 由于 Busybox 的方法不需要安装额外的程序, 因此不建议专门为此装 WSL.
 
@@ -111,7 +119,7 @@ sudo sed "s@Exec=.*@Exec=\"`realpath ./start-easyconnect-linux.sh`\"@" /usr/shar
 # 上一行命令的注释去掉(加 -i)才能写入
 ```
 
-如果不希望使用 EasyConnect 提供的 DNS 服务器, 可以对程序进行 patch:
+~~如果不希望使用 EasyConnect 提供的 DNS 服务器, 可以对程序进行 patch~~ (版本更新后已不支持):
 
 ```bash
 cd /usr/share/sangfor/EasyConnect/resources/bin
